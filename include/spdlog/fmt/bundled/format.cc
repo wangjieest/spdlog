@@ -25,9 +25,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Commented out by spdlog to use header only
-// #include "fmt/format.h"
-// #include "fmt/printf.h"
+#include "fmt/format.h"
+#include "fmt/printf.h"
 
 #include <string.h>
 
@@ -214,6 +213,23 @@ void report_error(FormatFunc func, int error_code,
 }  // namespace
 
 namespace internal {
+
+#ifdef _MSC_VER
+FMT_FUNC std::wstring mbs_to_wcs(const char* src, size_t count) {
+  std::wstring wcs;
+  int len = MultiByteToWideChar(FMT_MSC_CODEPAGE, 0, src, count, NULL, NULL);
+  wcs.resize(len);
+  MultiByteToWideChar(FMT_MSC_CODEPAGE, 0, src, count, &wcs[0], len);
+  return wcs;
+}
+FMT_FUNC std::string wcs_to_mbs(const wchar_t* src, size_t count) {
+  std::string mbs;
+  int len = WideCharToMultiByte(FMT_MSC_CODEPAGE, 0, src, count, NULL, 0, NULL, NULL);
+  mbs.resize(len);
+  WideCharToMultiByte(FMT_MSC_CODEPAGE, 0, src, count, &mbs[0], len, NULL, NULL);
+  return mbs;
+}
+#endif
 
 // This method is used to preserve binary compatibility with fmt 3.0.
 // It can be removed in 4.0.
